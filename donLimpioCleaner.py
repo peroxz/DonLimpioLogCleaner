@@ -5,6 +5,7 @@ import sys
 
 import argparse
 import os.path
+import fileinput
 from flashtext import KeywordProcessor
 
 # References:
@@ -30,7 +31,7 @@ class DonLimpioLogCleaner:
     def setKeywords(self, filename):
         if not os.path.isfile(filename):
             eprint("error: <{}> file not exists".format(filename))
-            return
+            exit(1)
         with open(filename) as f:
             for line in f:
                 line = line.strip()
@@ -38,12 +39,15 @@ class DonLimpioLogCleaner:
             self.canRun = True
 
     def processLine(self, line, invertMatch=False):
-        line = line.strip()
-        keywordsFound = self.keywordProcessor.extract_keywords(line)
-        if keywordsFound and invertMatch==False:
-            print(line)
-        elif not keywordsFound and invertMatch==True:
-            print(line)
+        try:
+            line = line.strip()
+            keywordsFound = self.keywordProcessor.extract_keywords(line)
+            if keywordsFound and invertMatch==False:
+                print(line)
+            elif not keywordsFound and invertMatch==True:
+                print(line)
+        except:
+            eprint("error: cannot process line")
 
     def processFile(self, filename, invertMatch=False):
         if not os.path.isfile(filename):
@@ -67,13 +71,12 @@ class DonLimpioLogCleaner:
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('-i', '--input',
-                        metavar='FILE',
-                        required=True,
-                        help='Obtain patterns from FILE, one per line')
+    parser.add_argument('input',
+                        metavar='KEYWORD_FILE',
+                        help='Obtain keywords from FILE, one per line')
     parser.add_argument('-f', '--file',
-                        metavar='FILE',
-                        required=True,
+                        metavar='LOG_FILE',
+                        required=False,
                         help='Obtain log file to process')
     parser.add_argument('-v', '--invert-match',
                         action='store_true',
@@ -85,7 +88,12 @@ def main():
 
     if args.input:
         donlimpio = DonLimpioLogCleaner(args.input)
-        if args.file:
+        if args.file is None:
+            # References:
+            # https://gist.github.com/martinth/ed991fb8cdcac3dfadf7
+            for line in fileinput.input(('-', )):
+                donlimpio.processLine(line, args.invert_match)
+        elif args.file:
             donlimpio.processFile(args.file, args.invert_match)
 
 if __name__ == '__main__':

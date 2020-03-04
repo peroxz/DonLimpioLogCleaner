@@ -1,9 +1,19 @@
-#!/usr/bin/env python3
+#! /usr/bin/env python3
+
+from __future__ import print_function
+import sys
 
 import argparse
 import os.path
 from flashtext import KeywordProcessor
 
+# References:
+# https://stackoverflow.com/questions/5574702/how-to-print-to-stderr-in-python
+def eprint(*args, **kwargs):
+    print(*args, file=sys.stderr, **kwargs)
+
+# References:
+# https://dev.to/vi3k6i5/regex-was-taking-5-days-to-run-so-i-built-a-tool-that-did-it-in-15-minutes-c98
 class DonLimpioLogCleaner:
     canRun = False
 
@@ -19,7 +29,7 @@ class DonLimpioLogCleaner:
 
     def setKeywords(self, filename):
         if not os.path.isfile(filename):
-            print("error: <{}> file not exists".format(filename))
+            eprint("error: <{}> file not exists".format(filename))
             return
         with open(filename) as f:
             for line in f:
@@ -37,12 +47,23 @@ class DonLimpioLogCleaner:
 
     def processFile(self, filename, invertMatch=False):
         if not os.path.isfile(filename):
-            print("error: <{}> file not exists".format(filename))
+            eprint("error: <{}> file not exists".format(filename))
             return
         if self.canRun:
+            i = 1
             with open(filename) as f:
-                for line in f:
-                    self.processLine(line, invertMatch)
+                try:
+                    for line in f:
+                        try:
+                            self.processLine(line, invertMatch)
+                        except:
+                            eprint("error: cannot process line {}".format(i))
+                            pass
+                        i += 1
+                except:
+                    eprint("error: cannot process line {} in file {}"
+                        .format(i, filename))
+                    pass
 
 def main():
     parser = argparse.ArgumentParser()

@@ -3,7 +3,7 @@ Search keywords from a list in a big log file and print the matched line. It sup
 
 The output prints to STDOUT. The error prints to STERR. It's like a supergrep command.
 
-You can grep GB logs in minutes. For example: 8000 keywords to 35 GB logs in 85 minutes. Less time with fileinput and xargs command.
+You can grep GB logs in minutes. For example: 8000 keywords to 35 GB logs in 85 minutes.
 
   ## Help
   
